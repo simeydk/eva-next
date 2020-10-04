@@ -9,7 +9,11 @@
   },
   "dependencies": {
     "next": "9.5.3",
+    "node-system-icon": "^0.0.19",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "sequelize": "^6.3.5",
+    "sqlite": "^4.0.15",
+    "winattr": "^3.0.0"
   }
 }
