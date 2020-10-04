@@ -1,7 +1,12 @@
-import systemIcon from 'node-system-icon'
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+const fs = require('fs')
+const { getImageForPath } = require('shell-image-win');
 
 export default (req, res) => {
-  res.statusCode = 200
-  res.json({ name: 'John Doe' })
+  const path = req.query.for
+  
+  getImageForPath(path, { height: 32, width: 32 }, (err, imageBuffer) => {      
+      res.setHeader('Content-Type', 'image/jpg')
+      res.send(imageBuffer)
+      res.end()
+    })
 }

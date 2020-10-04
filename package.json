@@ -10,10 +10,15 @@
   "dependencies": {
     "next": "9.5.3",
     "node-system-icon": "^0.0.19",
+    "postcss": "^8.1.1",
+    "postcss-preset-env": "^6.7.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "sequelize": "^6.3.5",
+    "shell-image-win": "^0.3.0",
     "sqlite": "^4.0.15",
+    "tailwindcss": "^1.8.10",
+    "tmp": "^0.2.1",
     "winattr": "^3.0.0"
   }
 }
