@@ -18,7 +18,7 @@ module.exports = async (options = {}) => {
     
     Source.hasMany(DirEntry)
     DirEntry.belongsTo(Source)
-    await sequelize.sync({force:true})
+    await sequelize.sync({alter:true})
 
     return sequelize
     }

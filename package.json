@@ -17,6 +17,7 @@
     "sequelize": "^6.3.5",
     "shell-image-win": "^0.3.0",
     "sqlite": "^4.0.15",
+    "sqlite3": "^5.0.0",
     "tailwindcss": "^1.8.10",
     "tmp": "^0.2.1",
     "winattr": "^3.0.0"
