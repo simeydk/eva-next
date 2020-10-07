@@ -32,6 +32,7 @@ function extractDataValues(results) {
 
 async function search(queryString, filesOnly = true) {
     const words = queryString.split(' ')
+    if (Math.max(...words.map(w => w.length)) < 3) return []
     const filesOnlyFilter = filesOnly ? { isFolder: false } : {}
     const results = await models.DirEntry.findAll({
         where: {
