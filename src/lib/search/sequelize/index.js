@@ -4,7 +4,7 @@ const addSource = require('./models/Source.model')
 const DEFAULT_OPTIONS = {
     dialect: 'sqlite',
     logging: false,
-    storage: 'db.sqlite',
+    storage: '.data/db.sqlite',
 }
 
 module.exports = async (options = {}) => {
@@ -18,7 +18,7 @@ module.exports = async (options = {}) => {
     
     Source.hasMany(DirEntry)
     DirEntry.belongsTo(Source)
-    await sequelize.sync({alter:true})
+    await sequelize.sync()
 
     return sequelize
     }
