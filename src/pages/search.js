@@ -2,6 +2,9 @@
 import { useState, useEffect } from 'react'
 import { debounce } from 'lodash'
 import Highlighter from 'react-highlight-words'
+import filesize from 'filesize'
+import formatDate from '../utils/formatDate'
+
 function useFetch(url, initialvalue = '') {
   const [response, setResponse] = useState(initialvalue)
   useEffect(() => { fetch(url).then(response => response.json()).then(setResponse) }, [url])
@@ -35,16 +38,16 @@ export default function Search() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-3 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                       Name
               </th>
-                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 bg-gray-50 text-right text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                       Mod
               </th>
-                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 bg-gray-50 text-right text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                       Size
               </th>
-                    <th className="px-6 py-3 bg-gray-50"></th>
+                    <th className="px-4 py-3 bg-gray-50"></th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 border border-gray-200  shadow-sm rounded-xl">
@@ -70,14 +73,8 @@ function Result({ name = '', location = '', fullName = '', sizeBytes = 0, mtime 
           <img className="h-8 w-8" src={`/api/icon?for=${fullName}`} alt="" />
         </div>
         <div className="ml-3">
-          <div className="text-sm leading-5 font-medium text-gray-900">
-            <Highlighter
-              highlightClassName="bg-yellow-200"
-              searchWords={searchWords}
-              autoEscape={true}
-              textToHighlight={name}
-            />
-            {/* {name} */}
+          <div className="text-sm leading-5 font-medium text-gray-900 whitespace-normal">
+            <Highlighter highlightClassName="bg-yellow-200" searchWords={searchWords} autoEscape={true} textToHighlight={name} />
           </div>
           <div className="text-sm leading-5 text-gray-500 whitespace-normal">
             {location}
@@ -85,13 +82,13 @@ function Result({ name = '', location = '', fullName = '', sizeBytes = 0, mtime 
         </div>
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-no-wrap">
-      <div className="text-sm leading-5 text-gray-500">{mtime}</div>
+    <td className="px-3 py-4 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
+      {formatDate(new Date(mtime))}
     </td>
-    <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-      {sizeBytes}
+    <td className="px-3 py-4 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
+      {filesize(sizeBytes, { round: 1 })}
     </td>
-    <td className="px-6 py-2 whitespace-no-wrap text-right text-xs leading-5 font-medium">
+    <td className="px-3 py-2 whitespace-no-wrap text-right text-xs leading-5 font-medium">
       <div>
         <a href="#" className="text-indigo-600 hover:text-indigo-900">Copy</a>
       </div>

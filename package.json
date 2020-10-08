@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "clone-buffer": "^1.0.0",
+    "date-fns": "^2.16.1",
     "express": "^4.17.1",
+    "filesize": "^6.1.0",
     "lodash": "^4.17.20",
     "next": "9.5.3",
     "node-system-icon": "^0.0.19",
