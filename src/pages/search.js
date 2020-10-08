@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react'
 import { debounce } from 'lodash'
-
+import Highlighter from 'react-highlight-words'
 function useFetch(url, initialvalue = '') {
   const [response, setResponse] = useState(initialvalue)
   useEffect(() => { fetch(url).then(response => response.json()).then(setResponse) }, [url])
@@ -29,29 +29,30 @@ export default function Search() {
             <input type="text" value={draft} onChange={e => setDraft(e.target.value)} className="w-full text-xl py-1 px-3 rounded-lg bg-gray-300 text-gray-700 border border-gray-500 focus:outline-none focus:bg-white focus:text-gray-800 focus:border-teal-800 transition-colors duration-100" />
           </div>
         </form>
-        <div className="max-w-4xl mx-auto">
-          <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-3 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                    Name
+        {response.results.length === 0 ? null :
+          <div className="max-w-4xl mx-auto">
+            <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-3 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                      Name
               </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                    Mod
+                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                      Mod
               </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                    Size
+                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                      Size
               </th>
-                  <th className="px-6 py-3 bg-gray-50"></th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200 border border-gray-200  shadow-sm rounded-xl">
-                {response.results.map(result => <Result {...result} />)}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    <th className="px-6 py-3 bg-gray-50"></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200 border border-gray-200  shadow-sm rounded-xl">
+                  {response.results.map(result => <Result {...result} searchWords={response.q.split(' ')} />)}
+                </tbody>
+              </table>
+            </div>
+          </div>}
       </div>
 
     </div>
@@ -61,7 +62,7 @@ export default function Search() {
 }
 
 
-function Result({ name = '', location = '', fullName = '', sizeBytes = 0, mtime = '' }) {
+function Result({ name = '', location = '', fullName = '', sizeBytes = 0, mtime = '', searchWords = [] }) {
   return <tr>
     <td className="px-3 py-1 whitespace-no-wrap">
       <div className="flex">
@@ -70,7 +71,13 @@ function Result({ name = '', location = '', fullName = '', sizeBytes = 0, mtime 
         </div>
         <div className="ml-3">
           <div className="text-sm leading-5 font-medium text-gray-900">
-            {name}
+            <Highlighter
+              highlightClassName="bg-yellow-200"
+              searchWords={searchWords}
+              autoEscape={true}
+              textToHighlight={name}
+            />
+            {/* {name} */}
           </div>
           <div className="text-sm leading-5 text-gray-500 whitespace-normal">
             {location}
