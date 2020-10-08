@@ -1,5 +1,3 @@
-const fs = require('fs')
-const path = require('path')
 const open = require('open')
 
 export default async (req, res) => {
