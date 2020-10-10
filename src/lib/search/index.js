@@ -6,9 +6,10 @@ const setupSequelize = require('./sequelize')
 
 
 let models
+let sequelize
 
-async function init() {
-    const sequelize = await setupSequelize()
+async function init()   {
+    sequelize = await setupSequelize()
     models = sequelize.models
     // console.log('done setting up sequelize', sequelize.models)
 }
@@ -38,7 +39,8 @@ async function search(queryString, filesOnly = true) {
         where: {
             [Op.and]: words.map(word => ({ name: { [Op.substring]: word } })),
             ...filesOnlyFilter,
-        }
+        },
+        limit: 20,
     }).then(extractDataValues)
     return results
 }
@@ -60,7 +62,20 @@ function setSources(sources) {
 }
 
 function getSources() {
-    return models.Source.findAll().then(extractDataValues)
+    
+    return models.Source.findAll({
+        include: [
+        {
+            model: models.DirEntry,
+            attributes: [
+                [sequelize.fn('count', sequelize.col('name')), 'entries'],
+                [sequelize.fn('sum', sequelize.col('DirEntries.isFolder')), 'folders'],
+                [sequelize.fn('sum', sequelize.col('DirEntries.sizeBytes')), 'totalSizeBytes'],
+            ]
+        }
+        ],
+        group: ['source.location'],
+    }).then(extractDataValues)
 }
 
 module.exports = {
