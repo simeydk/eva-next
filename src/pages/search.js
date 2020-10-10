@@ -21,7 +21,7 @@ function useDraft(initialValue) {
 }
 
 export default function Search() {
-  const [draft, setDraft, query, commit] = useDraft('variable xls')
+  const [draft, setDraft, query, commit] = useDraft('.pdf')
   const response = useFetch(`/api/search?q=${query}`, { q: query, results: [] })
 
   return (
@@ -36,22 +36,16 @@ export default function Search() {
           <div className="max-w-4xl mx-auto">
             <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead>
+                {/* <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-4 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-              </th>
-                    <th className="px-4 py-3 bg-gray-50 text-right text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      Mod
-              </th>
-                    <th className="px-4 py-3 bg-gray-50 text-right text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      Size
-              </th>
-                    <th className="px-4 py-3 bg-gray-50"></th>
+                    <TH className="text-left"> Name </TH>
+                    <TH className="text-right"> Mod </TH>
+                    <TH className="text-right"> Size </TH>
+                    <TH className="text-right"></TH>
                   </tr>
-                </thead>
+                </thead> */}
                 <tbody className="bg-white divide-y divide-gray-200 border border-gray-200  shadow-sm rounded-xl">
-                  {response.results.map(result => <Result {...result} searchWords={response.q.split(' ')} />)}
+                  {response.results.map(result => <Result {...result} searchWords={response.q.split(' ')} key={JSON.stringify(result)} />)}
                 </tbody>
               </table>
             </div>
@@ -65,30 +59,36 @@ export default function Search() {
 }
 
 
-function Result({ name = '', location = '', fullName = '', sizeBytes = 0, mtime = '', searchWords = [] }) {
-  return <tr>
-    <td className="px-3 py-1 whitespace-no-wrap">
+function TH({children, className = ""}) {
+  return <th className={"px-4 py-3 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider " + className}>
+    {children}
+  </th>
+}
+
+function Result({ name = '', location = '', fullName = '', sizeBytes = 0, mtime = '', searchWords = [], hidden = false, system = false, archive = false }) {
+  return <tr className={(hidden || system) ? "opacity-75" : ""}>
+    <td className="px-3 py-2 whitespace-no-wrap">
       <div className="flex">
-        <div className="flex-shrink-0 h-8 w-8 pt-1">
-          <img className="h-8 w-8" src={`/api/icon?for=${fullName}`} alt="" />
+        <div className="flex-shrink-0 h-6 w-6 pt-1">
+          <img className="h-6 w-6" src={`/api/icon?for=${fullName}`} alt="" />
         </div>
         <div className="ml-3">
-          <div className="text-sm leading-5 font-medium text-gray-900 whitespace-normal">
+          <div className="text-base leading-5 font-medium text-gray-900 whitespace-normal">
             <Highlighter highlightClassName="bg-yellow-200" searchWords={searchWords} autoEscape={true} textToHighlight={name} />
           </div>
-          <div className="text-sm leading-5 text-gray-500 whitespace-normal">
+          <div className="text-xs leading-tight text-gray-500 whitespace-normal">
             {location}
           </div>
         </div>
       </div>
     </td>
-    <td className="px-3 py-4 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
+    <td className="px-2 py-4 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
       {formatDate(new Date(mtime))}
     </td>
-    <td className="px-3 py-4 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
+    <td className="px-2 py-4 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
       {filesize(sizeBytes, { round: 1 })}
     </td>
-    <td className="px-3 py-2 whitespace-no-wrap text-right text-xs leading-5 font-medium">
+    <td className="px-2 py-1 whitespace-no-wrap text-right text-xs leading-tight font-medium">
       <div>
         <a href="#" className="text-indigo-600 hover:text-indigo-900">Copy</a>
       </div>
