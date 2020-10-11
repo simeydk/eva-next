@@ -31,8 +31,9 @@ const HeroIcons = {
 
 function useFetch(url, initialvalue = '') {
   const [response, setResponse] = useState(initialvalue)
-  useEffect(() => { fetch(url).then(response => response.json()).then(setResponse) }, [url])
-  return response
+  const refresh = () => fetch(url).then(response => response.json()).then(setResponse) 
+  useEffect(refresh, [url])
+  return [response, refresh]
 }
 
 function useDraft(initialValue) {
@@ -45,29 +46,24 @@ function useDraft(initialValue) {
 }
 
 export default function Sources() {
-  const response = useFetch(`/api/sources`, { sources: [] })
+  const [response, refreshResponse] = useFetch(`/api/sources`, { sources: [] })
   const { sources } = response
+  const updateAll = () => {fetch('/api/sources/update').then(refreshResponse)}
   return (
     <div className="min-h-screen bg-gray-200 p-1">
       <div className="mx-auto max-w-2xl">
-        <h1>Sources</h1>
+        <div className="flex px-4 justify-between">
+        <h1 className="text-2xl font-bold my-2">Sources</h1>
+        <button onClick={updateAll} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
+        <HeroIcons.refresh className="h-6 mt-px" />
+      </button>
+        </div>
         {sources.length === 0 ? null :
           <div className="max-w-4xl mx-auto">
-            {/* <pre>{JSON.stringify(sources, null, 2)}</pre> */}
             <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <TH className="text-left"> Name </TH>
-                    <TH className="text-right"> Files</TH>
-                    <TH className="text-right"> Folders </TH>
-                    <TH className="text-right"> Size </TH>
-                    <TH className="text-right"></TH>
-                  </tr>
-                </thead>
                 <tbody className="bg-white divide-y divide-gray-200 border border-gray-200  shadow-sm rounded-xl">
                   {sources.map(Source)}
-                  {/* {sources.map(source => <Source {...source} />)} */}
                 </tbody>
               </table>
             </div>
@@ -88,65 +84,75 @@ function TH({ children, className = "" }) {
 }
 
 function Source({ location = '', DirEntries, refresh, remove }) {
-  const { entries, folders, totalSizeBytes } = DirEntries[0]
+  const { entries = 0, folders = 0, totalSizeBytes = 0} = DirEntries[0] || {}
   const files = entries - folders
   const filesText = Number(files).toLocaleString()
   const foldersText = Number(folders).toLocaleString()
-  const sizeText = filesize(DirEntries[0].totalSizeBytes, { round: 1 })
+  const sizeText = filesize(totalSizeBytes, { round: 1 })
 
   if (!refresh) refresh = () => { }
   if (!remove) remove = () => { }
 
   return (<tr >
     <td className="px-3 py-2 whitespace-no-wrap">
-      <div className="flex ">
+      <div className="flex">
         <div className="flex-shrink-0 h-6 w-6">
           <img className="h-6 w-6" src={`/api/icon?for=${location}`} alt="" />
         </div>
         <div className="ml-3">
-          <div className="text-base leading-5 text-gray-900 whitespace-normal">
+          <div className="leading-5 whitespace-normal mb-1">
             {location}
+          </div>
+          <div className="flex gap-3 text-xs">
+            <div className="whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
+              <div className="flex justify-end items-center gap-1">
+                <div>
+                  {filesText}
+                </div>
+                <div className="flex-shrink-0 h-4 w-4">
+                  <HeroIcons.document className="text-gray-400 h-4 mt-px" />
+                </div>
+              </div>
+            </div>
+            <div className="whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
+              <div className="flex justify-end items-center gap-1">
+                <div>
+                  {foldersText}
+                </div>
+                <div className="flex-shrink-0 h-4 w-4">
+                  <HeroIcons.folder className="text-gray-400 h-4 mt-px" />
+                </div>
+              </div>
+            </div>
+            <div className="whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
+              <div className="flex justify-end items-center gap-1">
+                <div>
+                  {sizeText}
+                </div>
+                <div className="flex-shrink-0 h-4 w-4">
+                  <HeroIcons.pie className="text-gray-400 h-4 mt-px" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
     </td>
-    <td className="px-2 py-2 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
-      <div className="flex justify-end items-center gap-1">
-        <div>
-          {filesText}
-        </div>
-        <div className="flex-shrink-0 h-4 w-4">
-          <HeroIcons.document className="text-gray-400 h-4 mt-px" />
-        </div>
-      </div>
+    <td className="w-2">
+      <button className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
+        <HeroIcons.pencil className="h-6 mt-px" />
+      </button>
     </td>
-    <td className="px-2 py-2 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
-      <div className="flex justify-end items-center gap-1">
-        <div>
-          {foldersText}
-        </div>
-        <div className="flex-shrink-0 h-4 w-4">
-          <HeroIcons.folder className="text-gray-400 h-4 mt-px" />
-        </div>
-      </div>
+    <td className="w-2">
+      <button onClick={refresh} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
+        <HeroIcons.refresh className="h-6 mt-px" />
+      </button>
     </td>
-    <td className="px-2 py-2 whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
-      <div className="flex justify-end items-center gap-1">
-        <div>
-          {sizeText}
-        </div>
-        <div className="flex-shrink-0 h-4 w-4">
-          <HeroIcons.pie className="text-gray-400 h-4 mt-px" />
-        </div>
-      </div>
-
-    </td>
-    <td className="px-2 py-1 whitespace-no-wrap text-right leading-tight">
-      <div className="flex flex-col justify-end gap-1" >
-        <button onclick={refresh} href="#" className="bg-indigo-200 hover:bg-indigo-300 rounded-full text-indigo-600 hover:text-indigo-900 text-xs font-medium">Refresh</button>
-        <button onclick={remove} href="#" className="bg-indigo-200 hover:bg-indigo-300 rounded-full text-indigo-600 hover:text-indigo-900 text-xs font-medium">Remove</button>
-      </div>
+    <td className="w-2">
+      <button onClick={remove} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
+        <HeroIcons.trash className="h-6 mt-px" />
+      </button>
     </td>
   </tr>);
 }
