@@ -8,23 +8,26 @@ const setupSequelize = require('./sequelize')
 let models
 let sequelize
 
-async function init()   {
+async function init() {
     sequelize = await setupSequelize()
     models = sequelize.models
     // console.log('done setting up sequelize', sequelize.models)
 }
 
 async function update(sources) {
-    const where = sources ? {location: sources} : {} 
-    for (const source of await models.Source.findAll({where})) {
-        await source.removeDirEntries({where:{}, truncate:true})
+    const where = sources ? { location: sources } : {}
+    for (const source of await models.Source.findAll({ where, logging: console.log } )) {
+        const numDestroyedRows = (await models.DirEntry.destroy({
+            where: { SourceLocation: source.dataValues.location},
+        }))
+        console.log({source: source.dataValues.location, numDestroyedRows})
         const dirEntries = await models.DirEntry.bulkCreate(indexFolder(source.location))
         await source.addDirEntries(dirEntries)
     }
 }
 
-function all() {
-    return models.DirEntry.findAll().then(extractDataValues)
+function all(params = {}) {
+    return models.DirEntry.findAll(params).then(extractDataValues)
 }
 
 function extractDataValues(results) {
@@ -62,17 +65,17 @@ function setSources(sources) {
 }
 
 function getSources() {
-    
+
     return models.Source.findAll({
         include: [
-        {
-            model: models.DirEntry,
-            attributes: [
-                [sequelize.fn('count', sequelize.col('name')), 'entries'],
-                [sequelize.fn('sum', sequelize.col('DirEntries.isFolder')), 'folders'],
-                [sequelize.fn('sum', sequelize.col('DirEntries.sizeBytes')), 'totalSizeBytes'],
-            ]
-        }
+            {
+                model: models.DirEntry,
+                attributes: [
+                    [sequelize.fn('count', sequelize.col('name')), 'entries'],
+                    [sequelize.fn('sum', sequelize.col('DirEntries.isFolder')), 'folders'],
+                    [sequelize.fn('sum', sequelize.col('DirEntries.sizeBytes')), 'totalSizeBytes'],
+                ]
+            }
         ],
         group: ['source.location'],
     }).then(extractDataValues)
