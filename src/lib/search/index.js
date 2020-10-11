@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { Op } = require('sequelize')
-const indexFolder = require('../indexFolder')
+const indexFolder = require('../indexFolder/async')
 const setupSequelize = require('./sequelize')
 
 
@@ -20,8 +20,8 @@ async function update(sources) {
         const numDestroyedRows = (await models.DirEntry.destroy({
             where: { SourceLocation: source.dataValues.location},
         }))
-        console.log({source: source.dataValues.location, numDestroyedRows})
-        const dirEntries = await models.DirEntry.bulkCreate(indexFolder(source.location))
+        // console.log({source: source.dataValues.location, numDestroyedRows})
+        const dirEntries = await models.DirEntry.bulkCreate(await indexFolder(source.location))
         await source.addDirEntries(dirEntries)
     }
 }
