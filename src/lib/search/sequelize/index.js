@@ -16,7 +16,7 @@ module.exports = async (options = {}) => {
     
     const {DirEntry, Source} = sequelize.models
     
-    Source.hasMany(DirEntry)
+    Source.hasMany(DirEntry, { onDelete: 'cascade' })
     DirEntry.belongsTo(Source)
     await sequelize.sync()
 

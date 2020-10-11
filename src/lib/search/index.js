@@ -53,15 +53,20 @@ function browse(location) {
 }
 
 function addSources(sources) {
+    if (!Array.isArray(sources)) sources = [sources]
+    console.log(sources)
     const missingSources = sources.filter(source => !fs.existsSync(source))
     if (missingSources.length > 0) throw new Error('The following sources do not exist:\n' + missingSources.join('\n'))
     models.Source.bulkCreate(sources.map(path.normalize).map(source => ({ location: source })))
 }
 
 function setSources(sources) {
-    console.log(models)
     models.Source.destroy({ where: {}, truncate: true })
     addSources(sources)
+}
+
+function removeSources(sources) {
+    models.Source.destroy({ where: {Location:'D:\\Ebooks'}, truncate: true, logging: console.log }).then(console.log)
 }
 
 function getSources() {
@@ -89,4 +94,6 @@ module.exports = {
     update,
     getSources,
     setSources,
+    removeSources,
+    addSources,
 }

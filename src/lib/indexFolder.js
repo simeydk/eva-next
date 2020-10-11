@@ -14,7 +14,7 @@ function indexFolder(in_path) {
 }
 
 function* indexFolderGen(in_path) {
-    const root = typeof (in_path) === 'string' ? fileObject(path.dirname(in_path), path.basename(in_path)) : in_path
+    const root = typeof (in_path) === 'string' ? fileObject(path.dirname(in_path), path.basename(in_path), true) : in_path
     Object.assign(root, { numFiles: 0, numFolders: 0, folderSizeBytes: 0, })
 
     for (let name of fs.readdirSync(in_path)) {
@@ -35,20 +35,30 @@ function* indexFolderGen(in_path) {
     yield root
 }
 
-function fileObject(inLocation, name) {
+function fileObject(inLocation, name, inIsFolder) {
     const location = path.normalize(inLocation)
     const fullName = name ? (location + path.sep + name) : location
-    const stat = fs.lstatSync(fullName)
-    const attributes = ISWIN ? winattr.getSync(fullName) : { hidden: name.startsWith('.') }
-    return {
-        name,
-        location,
-        fullName,
-        isFolder: stat.isDirectory(),
-        sizeBytes: stat.size,
-        atime: stat.atime,
-        ctime: stat.ctime,
-        mtime: stat.mtime,
-        ...attributes
+    try {
+        
+        const stat = fs.lstatSync(fullName)
+        const attributes = ISWIN ? winattr.getSync(fullName) : { hidden: name.startsWith('.') }
+        return {
+            name,
+            location,
+            fullName,
+            isFolder: stat.isDirectory(),
+            sizeBytes: stat.size,
+            atime: stat.atime,
+            ctime: stat.ctime,
+            mtime: stat.mtime,
+            ...attributes
+        }
+    } catch (error) {
+        return {
+            name,
+            location,
+            fullName,
+            isFolder: inIsFolder, 
+        }
     }
 }

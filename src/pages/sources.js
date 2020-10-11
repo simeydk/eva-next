@@ -25,13 +25,19 @@ const HeroIcons = {
   trash: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
   </svg>,
+  external: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+  </svg>,
+  plus: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+  </svg>
 
 }
 
 
 function useFetch(url, initialvalue = '') {
   const [response, setResponse] = useState(initialvalue)
-  const refresh = () => fetch(url).then(response => response.json()).then(setResponse) 
+  const refresh = () => { fetch(url).then(response => response.json()).then(setResponse) }
   useEffect(refresh, [url])
   return [response, refresh]
 }
@@ -45,18 +51,28 @@ function useDraft(initialValue) {
   return [draft, setDraft, value, commit]
 }
 
+const NewSourceForm = ({refresh}) => {
+  const [newSource, setNewSource] = useState('')
+  return <form onSubmit={e => { e.preventDefault(); fetch(`/api/sources/add?sources=${newSource}`).then(refresh) }}>
+    <input value={newSource} onChange={e => setNewSource(e.target.value)} />
+    <button type="submit" className="bg-blue-200"><HeroIcons.plus /></button>
+  </form>
+}
+
 export default function Sources() {
   const [response, refreshResponse] = useFetch(`/api/sources`, { sources: [] })
   const { sources } = response
-  const updateAll = () => {fetch('/api/sources/update').then(refreshResponse)}
+  const updateAll = () => { fetch('/api/sources/update').then(refreshResponse) }
+
+
   return (
     <div className="min-h-screen bg-gray-200 p-1">
       <div className="mx-auto max-w-2xl">
         <div className="flex px-4 justify-between">
-        <h1 className="text-2xl font-bold my-2">Sources</h1>
-        <button onClick={updateAll} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
-        <HeroIcons.refresh className="h-6 mt-px" />
-      </button>
+          <h1 className="text-2xl font-bold my-2">Sources</h1>
+          <button onClick={updateAll} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
+            <HeroIcons.refresh className="h-6 mt-px" />
+          </button>
         </div>
         {sources.length === 0 ? null :
           <div className="max-w-4xl mx-auto">
@@ -67,7 +83,9 @@ export default function Sources() {
                 </tbody>
               </table>
             </div>
-          </div>}
+          </div>
+        }
+        <NewSourceForm refresh={refreshResponse} />
       </div>
 
     </div>
@@ -84,14 +102,14 @@ function TH({ children, className = "" }) {
 }
 
 function Source({ location = '', DirEntries, refresh, remove }) {
-  const { entries = 0, folders = 0, totalSizeBytes = 0} = DirEntries[0] || {}
+  const { entries = 0, folders = 0, totalSizeBytes = 0 } = DirEntries[0] || {}
   const files = entries - folders
   const filesText = Number(files).toLocaleString()
   const foldersText = Number(folders).toLocaleString()
   const sizeText = filesize(totalSizeBytes, { round: 1 })
 
-  if (!refresh) refresh = () => { }
-  if (!remove) remove = () => { }
+  if (!refresh) refresh = () => fetch(`/api/sources/update?sources=${location}`)
+  if (!remove) remove = () => fetch(`/api/sources/remove?sources=${location}`)
 
   return (<tr >
     <td className="px-3 py-2 whitespace-no-wrap">
@@ -106,31 +124,31 @@ function Source({ location = '', DirEntries, refresh, remove }) {
           <div className="flex gap-3 text-xs">
             <div className="whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
               <div className="flex justify-end items-center gap-1">
-                <div>
-                  {filesText}
-                </div>
                 <div className="flex-shrink-0 h-4 w-4">
                   <HeroIcons.document className="text-gray-400 h-4 mt-px" />
                 </div>
+                <div>
+                  {filesText}
+                </div>
               </div>
             </div>
             <div className="whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
               <div className="flex justify-end items-center gap-1">
-                <div>
-                  {foldersText}
-                </div>
                 <div className="flex-shrink-0 h-4 w-4">
                   <HeroIcons.folder className="text-gray-400 h-4 mt-px" />
                 </div>
+                <div>
+                  {foldersText}
+                </div>
               </div>
             </div>
             <div className="whitespace-no-wrap text-right text-sm leading-5 text-gray-500">
               <div className="flex justify-end items-center gap-1">
-                <div>
-                  {sizeText}
-                </div>
                 <div className="flex-shrink-0 h-4 w-4">
                   <HeroIcons.pie className="text-gray-400 h-4 mt-px" />
+                </div>
+                <div>
+                  {sizeText}
                 </div>
               </div>
             </div>
@@ -140,8 +158,8 @@ function Source({ location = '', DirEntries, refresh, remove }) {
 
     </td>
     <td className="w-2">
-      <button className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
-        <HeroIcons.pencil className="h-6 mt-px" />
+      <button onClick={() => fetch(`/api/open?p=${location}`)} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-200">
+        <HeroIcons.external className="h-6 mt-px" />
       </button>
     </td>
     <td className="w-2">
